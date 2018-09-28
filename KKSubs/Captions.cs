@@ -50,7 +50,7 @@ namespace KKSubs
 
             var rect = subtitle.GetComponent<RectTransform>() ?? subtitle.AddComponent<RectTransform>();
             rect.pivot = new Vector2(0.5f, 0);
-            rect.sizeDelta = new Vector2(Screen.width * 0.995f, fsize + (fsize * 0.05f));
+            rect.sizeDelta = new Vector2(Screen.width * 0.990f, fsize + (fsize * 0.05f));
 
             var text = subtitle.GetComponent<Text>() ?? subtitle.AddComponent<Text>();
             text.font = fontFace;
@@ -89,12 +89,12 @@ namespace KKSubs
             var fsize = KKSubsPlugin.fontSize.Value;
             fsize = (int)(fsize < 0 ? ((fsize * Screen.height / -100.0)) : fsize);
 
-            GameObject subtitle = new GameObject($"Test# {Pane.transform.childCount + 1} Lang {KKSubsPlugin.LangOptions.Value}" + (KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.ENG ? FIX : ""));
+            GameObject subtitle = new GameObject($"Test# {Pane.transform.childCount + 1} Lang {KKSubsPlugin.LangOptions.Value}" + (KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.Other ? "" : FIX));
             subtitle.transform.SetParent(Pane.transform);
 
             var rect = subtitle.GetComponent<RectTransform>() ?? subtitle.AddComponent<RectTransform>();
-            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0);
-            rect.sizeDelta = new Vector2(Screen.width * 0.995f, fsize * 0.05f);
+            rect.pivot = new Vector2(0.5f, 0);
+            rect.sizeDelta = new Vector2(Screen.width * 0.995f, fsize + (fsize * 0.05f));
 
             subtitle.AddComponent<LayoutElement>().flexibleHeight = fsize * 2;
 
@@ -102,12 +102,9 @@ namespace KKSubs
             text.font = fontFace;
             text.fontSize = fsize;
             text.fontStyle = (fontFace.dynamic) ? KKSubsPlugin.fontStyle.Value : FontStyle.Normal;
-            text.material = fontFace.material;
             text.alignment = KKSubsPlugin.textAlign.Value;
-            text.lineSpacing = 0;
-            //            text.resizeTextForBestFit = true;
-            //            text.alignByGeometry = true;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
             text.color = KKSubsPlugin.textColor.Value;
 
             var subOutline = subtitle.GetComponent<Outline>() ?? subtitle.AddComponent<Outline>();

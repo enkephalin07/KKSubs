@@ -15,10 +15,6 @@ namespace KKSubs
     {
         public const string GUID = "org.bepinex.kk.KKSubs";
         public const string BEPNAME = "[KKSubs] ";
-        public const string SSURL = "https://docs.google.com/spreadsheets/d/";
-        public const string SHEET_KEY = "1U0pRyY8e2fIg0E4iBXXRIzpGGDBs5W_g9KfjObS-xI0";
-        public const string GID = "677855862";
-        public const string RANGE = "A1:C";
 
         public static KKSubsPlugin Plugin { get; private set; }
         public static HarmonyInstance harmony { get; private set; }
@@ -147,6 +143,7 @@ namespace KKSubs
             CBCopy = new SavedKeyboardShortcut("Copy2Clipboard", this,
                 new KeyboardShortcut(KeyCode.None));
             SceneLogging = new SavedKeyboardShortcut("SceneLogging", this, new KeyboardShortcut(KeyCode.None));
+
             StartCoroutine(InitAsync());
 
             harmony = Hooks.InstallHooks(GUID);
@@ -278,6 +275,7 @@ namespace KKSubs
 
         public static Dictionary<string, KeyValuePair<string, string>>subs => VoiceCtrl.subtitlesDict;
         public static List<string> filenames => VoiceCtrl.subtitlesDict.Keys.ToList();
+        public static GameObject Captions => Caption.Pane;
 
         public static string TestCaptions()
         {
@@ -291,9 +289,7 @@ namespace KKSubs
                 return Caption.TestRemove();
             return false;
         }
-
 #endif
-
     }
 }
 
