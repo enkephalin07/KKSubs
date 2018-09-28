@@ -10,7 +10,7 @@ using UniRx.Triggers;
 
 namespace KKSubs
 {
-    [BepInPlugin(GUID: "org.bepinex.kk.KKSubs", Name: "KKSubs", Version: "0.8.1")]
+    [BepInPlugin(GUID: "org.bepinex.kk.KKSubs", Name: "KKSubs", Version: "0.8.5")]
     public class KKSubsPlugin : BaseUnityPlugin
     {
         public const string GUID = "org.bepinex.kk.KKSubs";
@@ -147,20 +147,17 @@ namespace KKSubs
             CBCopy = new SavedKeyboardShortcut("Copy2Clipboard", this,
                 new KeyboardShortcut(KeyCode.None));
             SceneLogging = new SavedKeyboardShortcut("SceneLogging", this, new KeyboardShortcut(KeyCode.None));
+            StartCoroutine(InitAsync());
+
+            harmony = Hooks.InstallHooks(GUID);
         }
 
-        void OnSettingChanged(object sender, EventArgs args) { Caption.InitGUI(); }
-        void OnSettingChanged() { Caption.InitGUI(); } // req for Patchwork
         internal static void RenameDirPath(object sender, EventArgs args) { SceneLog.RenameLogPath(); }
         void OnEnable() { }
         void OnDisable() { }
 
-        private static bool init = false;
         public void Update()
         {
-            if (!init)
-                init = UglyOffensiveBlock();
-
             if (ReloadTrans.IsPressed())
                 StartCoroutine(SubsCache.DownloadSubs());
             else if (CBCopy.IsPressed())
@@ -168,8 +165,10 @@ namespace KKSubs
             else if (SceneLogging.IsPressed()) sceneLogging.Value = !sceneLogging.Value;
         }
 
-        public bool UglyOffensiveBlock()
+        private IEnumerator<WaitWhile> InitAsync()
         {
+            yield return new WaitWhile(() => Singleton<Manager.Config>.Instance == null);
+
             string Col2str(Color c) => ColorUtility.ToHtmlStringRGBA(c);
             Color str2Col(string s) => ColorUtility.TryParseHtmlString("#" + s, out Color c) ? c : Color.clear;
 
@@ -188,14 +187,20 @@ namespace KKSubs
             outlineColor.SettingChanged += OnSettingChanged;
             outlineColor2.SettingChanged += OnSettingChanged;
 
+            LangOptions.SettingChanged += OnLangChange;
+
             RenameDirPath(null, null);
 
             SubsCache.UpdateSubs();
 
-            harmony = Hooks.InstallHooks(GUID);
-
-            return true;
+            yield return null;
         }
+
+        void OnSettingChanged(object sender, EventArgs args) { Caption.InitGUI(); }
+        void OnLangChange(object sender, EventArgs args) { Caption.UnfixFix(); }
+        // req for Patchwork
+        void OnSettingChanged() { Caption.InitGUI(); } 
+        void OnLangChange() { Caption.UnfixFix();  }
 
         public static void CleanupScene(HVoiceCtrl ctrl)
         {
@@ -235,12 +240,15 @@ namespace KKSubs
             public static void CatchVoice(LoadVoice __instance)
             {
 #if DEBUG
-               if (__instance.assetName != VoiceCtrl.hproc.voice.nowVoices[0].voiceInfo.nameFile ||
-                   (VoiceCtrl.hproc.flags.lstHeroine.Count > 0 && __instance.assetName != VoiceCtrl.hproc.voice.nowVoices[1].voiceInfo.nameFile))
+                if (!VoiceCtrl.hproc) return;
+
+                if (__instance.assetName.Length == 14 && !__instance.assetName.StartsWith("h_ko_") &&
+                    __instance.assetName != VoiceCtrl.hproc.voice.nowVoices[0].voiceInfo.nameFile &&
+                        VoiceCtrl.hproc.flags.lstHeroine.Count > 0 && __instance.assetName != VoiceCtrl.hproc.voice.nowVoices[1].voiceInfo.nameFile)
                    SPAM($"Voice clip playing [{__instance.assetName}] doesn't match current controlled voices.");
 
 #endif
-                if (__instance.assetName.Length != 14
+                if (!VoiceCtrl.hproc || __instance.assetName.Length != 14
                     ||__instance.audioSource == null || __instance.audioSource.clip == null || __instance.audioSource.loop)
                     return;
 

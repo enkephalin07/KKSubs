@@ -10,7 +10,7 @@ namespace KKSubs
 {
     public class SubsCache
     {
-        public static string fileCache => Path.Combine(Paths.PluginPath, "translation/hsubs.msgpack");
+        public static string fileCache => Path.Combine(Paths.PluginPath, "translation\\hsubs.msgpack");
 
         internal static bool UpdateSubs()
         {
@@ -34,8 +34,8 @@ namespace KKSubs
                 + KKSubsPlugin.GID + "&range=" + KKSubsPlugin.RANGE);
             while (!dl.isDone)
             {
-                BepInEx.Logger.Log(LogLevel.Debug, KKSubsPlugin.BEPNAME + $"DownloadSubs(): {dl.url} : {dl.progress}");
-                yield return new WaitForSeconds(30); // dl;
+                BepInEx.Logger.Log(LogLevel.Debug, KKSubsPlugin.BEPNAME + $"DownloadSubs(): {dl.url}");
+                yield return new WaitForSeconds(30);
             }
             BepInEx.Logger.Log(LogLevel.Debug, KKSubsPlugin.BEPNAME + "DownloadSubs(): Complete");
 
@@ -58,7 +58,7 @@ namespace KKSubs
 
         internal static Dictionary<string, KeyValuePair<string, string>> LoadFromMessagepack(string file = "")
         {
-            string cache = (file.IsNullOrEmpty() ? fileCache : file); 
+            string cache = (file.IsNullOrEmpty() ? fileCache : file);
             var dict = LZ4MessagePackSerializer.Deserialize<Dictionary<string, KeyValuePair<string, string>>>(File.ReadAllBytes(cache));
             BepInEx.Logger.Log(LogLevel.Info, KKSubsPlugin.BEPNAME + $"{dict.Count}  lines parsed in {cache}");
 

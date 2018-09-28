@@ -1,0 +1,6 @@
+D:\Users\enkep\source\repos\hsubs\HSubs\bin\Debug\HSubs.dll
+D:\Users\enkep\source\repos\hsubs\HSubs\bin\Debug\HSubs.pdb
+D:\Users\enkep\source\repos\hsubs\HSubs\obj\Debug\HSubs.csproj.CoreCompileInputs.cache
+D:\Users\enkep\source\repos\hsubs\HSubs\obj\Debug\HSubs.dll
+D:\Users\enkep\source\repos\hsubs\HSubs\obj\Debug\HSubs.pdb
+D:\Users\enkep\Source\Repos\hsubs\HSubs\obj\Debug\HSubs.csprojAssemblyReference.cache

@@ -16,7 +16,6 @@ namespace KKSubs
 
             var path = string.Join(Path.PathSeparator.ToString(), KKSubsPlugin.logDir.Value.Split(Path.GetInvalidPathChars()));
             path.Replace(Paths.PluginPath, "");
-            //            Logger.Log(BepInEx.Logging.LogLevel.Debug, BEPNAME + $"logDir: {logDir.Value}\tvalid path: {path}");
 
             if (Directory.Exists(Path.Combine(Paths.PluginPath, path)))
                 KKSubsPlugin.logDir.Value = path;

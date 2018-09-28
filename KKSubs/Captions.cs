@@ -1,5 +1,4 @@
-﻿//#define INTERNALHOOKS
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UniRx;
@@ -16,8 +15,8 @@ namespace KKSubs
 
         internal static bool InitGUI()
         {
-            if (!(Pane = Pane ?? (GameObject.Find(PANE)) ?? GameObject.Find(PANE+FIX)))
-                Pane = new GameObject(PANE + (KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.ENG ? FIX : ""));
+            if (!(Pane = Pane ?? (GameObject.Find(PANE)) ?? GameObject.Find(PANE + FIX)))
+                Pane = new GameObject(PANE + (KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.Other ? "" : FIX));
 
             var cscl = Pane.GetComponent<CanvasScaler>() ?? Pane.AddComponent<CanvasScaler>();
             cscl.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -57,9 +56,7 @@ namespace KKSubs
             text.font = fontFace;
             text.fontSize = fsize;
             text.fontStyle = (fontFace.dynamic) ? KKSubsPlugin.fontStyle.Value : FontStyle.Normal;
-            text.material = fontFace.material;
             text.alignment = KKSubsPlugin.textAlign.Value;
-            text.lineSpacing = 0;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
             text.verticalOverflow = VerticalWrapMode.Overflow;
             text.color = KKSubsPlugin.textColor.Value;
@@ -76,6 +73,12 @@ namespace KKSubs
                 subtitle.transform.SetParent(null);
                 Object.Destroy(subtitle);
             });
+        }
+
+        public static void UnfixFix()
+        {
+            if (Pane)
+                Pane.name = (KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.Other) ? PANE : PANE + FIX;
         }
 
 #if DEBUG
@@ -127,30 +130,6 @@ namespace KKSubs
         }
 #endif
     }
-
-#if INTERNALHOOKS
-        internal static class Hooks
-        {
-            public static HarmonyInstance harmony { get; internal set; }
-
-            public static void InstallHooks(string id)
-            {
-                harmony = HarmonyInstance.Create("org.bepinex.kk.hsubs.caption");
-                harmony.PatchAll(typeof(Hooks));
-            }
-
-            [HarmonyPostfix]
-            [HarmonyPatch(typeof(LoadVoice), "Play")]
-            public static void CatchVoice(LoadVoice __instance)
-            {
-                if (__instance.assetName.Length != 14
-                    || __instance.audioSource == null || __instance.audioSource.clip == null || __instance.audioSource.loop)
-                    return;
-                Plugin.GenerateSubtitle(__instance);
-            }
-        }
-    }
-#endif
 }
 /*
 //        public static TextGenerationSettings subGenSet;   // For mesh conversion

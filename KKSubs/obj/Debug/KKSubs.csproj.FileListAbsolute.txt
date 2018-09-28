@@ -1,0 +1,6 @@
+D:\Users\enkep\Source\Repos\hsubs\KKSubs\bin\Debug\KKSubs.dll
+D:\Users\enkep\Source\Repos\hsubs\KKSubs\bin\Debug\KKSubs.pdb
+D:\Users\enkep\Source\Repos\hsubs\KKSubs\obj\Debug\KKSubs.csproj.CoreCompileInputs.cache
+D:\Users\enkep\Source\Repos\hsubs\KKSubs\obj\Debug\KKSubs.dll
+D:\Users\enkep\Source\Repos\hsubs\KKSubs\obj\Debug\KKSubs.pdb
+D:\Users\enkep\source\repos\hsubs\KKSubs\obj\Debug\KKSubs.csprojAssemblyReference.cache

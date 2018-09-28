@@ -1,5 +1,4 @@
-﻿//#define INTERNALHOOKS
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -22,7 +21,7 @@ namespace KKSubs
             if (!subtitlesDict.TryGetValue(clipname, out KeyValuePair<string, string> subs) || subs.Key.IsNullOrEmpty())
                 return;
 
-//            currentLine = new KeyValuePair<string, string>(subs.Key, subs.Value);
+            currentLine = new KeyValuePair<string, string>(subs.Key, subs.Value);
 
             var speaker = voice.voiceTrans.gameObject.GetComponentInParent<ChaControl>().chaFile.parameter.firstname;
             var outstring = $"[{clipname}] {speaker}:  {subs.Key}  {subs.Value}";
@@ -118,19 +117,20 @@ namespace KKSubs
         public static void GetVoiceFromInfo(HVoiceCtrl ctrl)
         {
            hproc = ctrl.flags.gameObject.GetComponent<HSceneProc>();
-
+            // I wish I could make this less ugly, but this is necessary
             for (int i = 0; i < ctrl.flags.lstHeroine.Count; i++)
             {
                 SaveData.Heroine.HExperienceKind experience = ctrl.flags.lstHeroine[i].HExperience;
                 for (int j = 0; j < 9; j++)
                 {
-                    if ((HFlag.EMode)j > HFlag.EMode.peeping && ctrl.flags.lstHeroine.Count < 2)
+                    /* Their HMode order is screwed up; sonyu and onani are swapped
+                    if ((HFlag.EMode)(j+1) > HFlag.EMode.peeping && ctrl.flags.lstHeroine.Count < 2)
                         break;
 
-                    if (((HFlag.EMode)j == HFlag.EMode.peeping || (HFlag.EMode)j == HFlag.EMode.masturbation)
+                    if (((HFlag.EMode)(j+1) == HFlag.EMode.peeping || (HFlag.EMode)j == HFlag.EMode.masturbation)
                         && (hproc.dataH.peepCategory[0] == 0 || ctrl.flags.lstHeroine.Count > 1))
                         continue;
-
+                        */
                     if (ctrl.dicVoiceIntos[i][j] != null && ctrl.dicVoiceIntos[i][j].Count > 0)
                         for (int k = 0; k < ctrl.dicVoiceIntos[i][j].Count; k++)
                         {
@@ -151,36 +151,9 @@ namespace KKSubs
             }
             BepInEx.Logger.Log(BepInEx.Logging.LogLevel.Info, KKSubsPlugin.BEPNAME + $"subtiles {subtitlesDict.Count}");
 
-            if (KKSubsPlugin.Updatemode.Value != KKSubsPlugin.UpdateMode.Scene)
-            {
-                var dict = SubsCache.LoadFromMessagepack();
-                if (dict == null) return;
-
-                foreach (var nameFile in subtitlesDict.Keys)
-                {
-                    try
-                    {
-                        if (!dict.ContainsKey(nameFile))
-                        {
-                            KKSubsPlugin.SPAM($" [{nameFile}] not found in cache");
-                            dict.Add(nameFile, subtitlesDict[nameFile]);
-                        }
-                        else if (dict.ContainsValue(subtitlesDict[nameFile]) && !(dict[nameFile]).Value.IsNullOrEmpty())
-                        {
-                            KKSubsPlugin.SPAM(nameFile + ": cache up to date");
-                        }
-                        else if ((dict[nameFile]).Key.IsNullOrEmpty() && !(subtitlesDict[nameFile]).Key.IsNullOrEmpty() ||
-                                (dict[nameFile]).Value.IsNullOrEmpty() && !(subtitlesDict[nameFile]).Value.IsNullOrEmpty())
-                        {
-                            dict.Remove(nameFile);
-                            dict.Add(nameFile, subtitlesDict[nameFile]);
-                        }
-                    }
-                    catch { }
-                }
-                SubsCache.SaveToMessagepack(dict);
-            }
-            else
+#region update from remote
+/*
+            if (KKSubsPlugin.Updatemode.Value == KKSubsPlugin.UpdateMode.Scene)
             {
                 if (false)
                 {
@@ -188,75 +161,51 @@ namespace KKSubs
                     // List<string> englines = SubsCache.GetSomethingRemoteAndUnsupported(subtitlesDict.Keys);
                 }
             }
-        }
-    }
-
-#if INTERNALHOOKS
-        public static class Hooks
-        {
-            public static HarmonyInstance harmony { get; internal set; }
-
-            public static void InstallHooks(string id)
-            {
-                harmony = HarmonyInstance.Create("org.bepinex.kk.hsubs.voicectrl");
-                harmony.PatchAll(typeof(Hooks));
-            }
-
-            [HarmonyPostfix]
-            [HarmonyPatch(typeof(HVoiceCtrl), "Init", new Type[] { typeof(string), typeof(string), typeof(string) })]
-            public static void LoadHVoices(string _chaFolder, string _chaFolder1, string _pathAssetFolder, HVoiceCtrl __instance)
-            {
-                InitScene(__instance);
-
-                __instance.OnDestroyAsObservable().Subscribe(delegate (Unit _)
-                    { CleanupScene(__instance); });
-            }
-
-            [HarmonyPatch(typeof(ActionGame.MotionVoice), "Init", new Type[] { typeof(SaveData.Heroine), })]
-            public static void LoadMotionVoices(SaveData.Heroine _heroine, HVoiceCtrl __instance)
-            {
-
-            }
-
-            public static void DetachPatch()
-            {
-                foreach (var method in harmony.GetPatchedMethods())
-                    harmony.RemovePatch(method, HarmonyPatchType.All, GUID);
-            }
-
-        }
-#endif
-}
-//                                            KKSubsPlugin.SPAM(kvp.Value.pathAsset + " : " + kvp.Value.word);                                        }
-/*                                        if (ctrl.dicVoiceIntos[i][j][k][l] != null && !ctrl.dicVoiceIntos[i][j][k][l].pathAsset.IsNullOrEmpty())
-                                        {
-                                            var vi = ctrl.dicVoiceIntos[i][j][k][l];
-                                            vinfos.Add(ctrl.dicVoiceIntos[i][j][k][l]);
-                                            KKSubsPlugin.SPAM(ctrl.dicVoiceIntos[i][j][k][l].pathAsset + " : " + ctrl.dicVoiceIntos[i][j][k][l].word);
-                                        }
-  */
-/*
-public static void AddToDictionary(string chaFolder, int mode, string pathAssetFolder, int main)
-{
-    string chafile = $"personality_voice_{chaFolder}_{mode.ToString("00")}_00";
-    KKSubsPlugin.SPAM("chafile:"+chafile);
-
-    string text = GlobalMethod.LoadAllListText(pathAssetFolder, chafile);
-    if (text.IsNullOrEmpty()) return;
-
-//            string[] rows = text.Trim().Split(new string[] { "\n", " " }, System.StringSplitOptions.RemoveEmptyEntries);
-
-    string[,] arr;
-    GlobalMethod.GetListString(text, out arr);
-    arr.Copy(arr, 1, arr.Length)
-;//            arr.GetLength(0)
-    for (int i = 0; i < arr.GetLength(0); i++)
-    {
-        KKSubsPlugin.SPAM(arr[i,0]);
-        for (int j = 0; j < arr.GetLength(1); j++)
-        {
-//                    KKSubsPlugin.SPAM(arr[i,j]);
-        }
-    }
-}
 */
+#endregion
+            // move this to SubsCache
+            var dict = SubsCache.LoadFromMessagepack();
+            if (dict == null) return;
+
+ #region update cache from voiceinfo
+            /*
+            foreach (var nameFile in subtitlesDict.Keys)
+            {
+                try
+                {
+                    if (!dict.ContainsKey(nameFile))
+                    {
+                        KKSubsPlugin.SPAM($" [{nameFile}] not found in cache");
+                        dict.Add(nameFile, subtitlesDict[nameFile]);
+                    }
+                    else if (dict.ContainsValue(subtitlesDict[nameFile]) && !(dict[nameFile]).Value.IsNullOrEmpty())
+                    {
+                        KKSubsPlugin.SPAM(nameFile + ": cache up to date");
+                    }
+                    else if ((dict[nameFile]).Key.IsNullOrEmpty() && !(subtitlesDict[nameFile]).Key.IsNullOrEmpty() ||
+                            (dict[nameFile]).Value.IsNullOrEmpty() && !(subtitlesDict[nameFile]).Value.IsNullOrEmpty())
+                    {
+                        dict.Remove(nameFile);
+                        dict.Add(nameFile, subtitlesDict[nameFile]);
+                    }
+                }
+                catch { }
+            }
+            SubsCache.SaveToMessagepack(dict);
+            */
+#endregion
+
+            var changes = from nameFile in subtitlesDict.Keys
+                          where dict.ContainsKey(nameFile) && !dict[nameFile].Value.IsNullOrEmpty()
+                          where subtitlesDict[nameFile].Value.IsNullOrEmpty()
+                          select new KeyValuePair<string, string>(nameFile, dict[nameFile].Value);
+
+            var tmp = new Dictionary<string, KeyValuePair<string, string>>();
+
+            foreach (var change in changes)
+                tmp.Add(change.Key, new KeyValuePair<string, string>(subtitlesDict[change.Key].Key, change.Value));
+
+            subtitlesDict = tmp;
+        }
+    }
+}
