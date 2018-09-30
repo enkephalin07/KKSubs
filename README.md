@@ -8,7 +8,7 @@ and new config section (now [org.bepinex.kk.KKSubs]).
 Changes: Most of the original Patchwork script's features have been implemented, minus remote editing (for now).
 Added:
 
-* Support for multiple speakers, multiple lines display lines, included the speaker's name for each line.
+* Support for multiple speakers, multiple display lines, included the speaker's name for each line.
 * Support for translation from external plugins, so languages other than English can be translated.
 * Built in support for Japanese display; a Japanese reader can view subtitles without ever downloading or
   connecting to remote sources.
