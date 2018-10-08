@@ -110,8 +110,8 @@ namespace KKSubs
 
         public static void GetVoiceFromInfo()
         {
-            HVoiceCtrl ctrl = Object.FindObjectOfType<HVoiceCtrl>();
-            if (ctrl) GetVoiceFromInfo(ctrl);
+            subtitlesDict = new Dictionary<string, KeyValuePair<string, string>>();
+            if (hproc) GetVoiceFromInfo(Object.FindObjectOfType<HVoiceCtrl>());
         }
 
         public static void GetVoiceFromInfo(HVoiceCtrl ctrl)
@@ -142,14 +142,12 @@ namespace KKSubs
                                     (SaveData.Heroine.HExperienceKind)k == experience))
                                     {
                                         subtitlesDict.Add(kvp.Value.nameFile.ToLower(), new KeyValuePair<string, string>(kvp.Value.word, ""));
-                                        //  KKSubsPlugin.SPAM($"Foreach experience: {(SaveData.Heroine.HExperienceKind)k}  Heroine[{i}] experience {experience}");
-                                    }
+                                   }
                                 }
                         }
                 }
 
             }
-            BepInEx.Logger.Log(BepInEx.Logging.LogLevel.Info, KKSubsPlugin.BEPNAME + $"subtiles {subtitlesDict.Count}");
 
 #region update from remote
 /*
@@ -206,6 +204,8 @@ namespace KKSubs
                 tmp.Add(change.Key, new KeyValuePair<string, string>(subtitlesDict[change.Key].Key, change.Value));
 
             subtitlesDict = tmp;
+            BepInEx.Logger.Log(BepInEx.Logging.LogLevel.Info, KKSubsPlugin.BEPNAME + $"{subtitlesDict.Count} scene subtitles.");
+
         }
     }
 }

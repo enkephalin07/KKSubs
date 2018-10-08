@@ -10,11 +10,6 @@ namespace KKSubs
 {
     public class SubsCache
     {
-        public const string SSURL = "https://docs.google.com/spreadsheets/d/";
-        public const string SHEET_KEY = "1U0pRyY8e2fIg0E4iBXXRIzpGGDBs5W_g9KfjObS-xI0";
-        public const string GID = "677855862";
-        public const string RANGE = "A1:C";
-
         public static string fileCache => Path.Combine(Paths.PluginPath, "translation\\hsubs.msgpack");
 
         internal static bool UpdateSubs()
@@ -33,10 +28,9 @@ namespace KKSubs
 
         internal static IEnumerator DownloadSubs()
         {
-            BepInEx.Logger.Log(LogLevel.Info, KKSubsPlugin.BEPNAME + "Downloading subs from " + SSURL + SHEET_KEY);
-            // + $"export?exportFormat=csv&gid={GID}&range={VOICEID}");
-            var dl = new WWW(SSURL + SHEET_KEY + "/export?exportFormat=csv&gid=" 
-                + GID + "&range=" + RANGE);
+            BepInEx.Logger.Log(LogLevel.Info, KKSubsPlugin.BEPNAME + "Downloading subs from " + KKSubsPlugin.sourceURL.Value + KKSubsPlugin.sourceSheet.Value);
+            var dl = new WWW(KKSubsPlugin.sourceURL.Value + KKSubsPlugin.sourceSheet.Value + "/export?exportFormat=csv&range=" + KKSubsPlugin.sourceRange.Value);
+
             while (!dl.isDone)
             {
                 BepInEx.Logger.Log(LogLevel.Debug, KKSubsPlugin.BEPNAME + $"DownloadSubs(): {dl.url}");
@@ -59,6 +53,8 @@ namespace KKSubs
                 File.WriteAllBytes(fileCache, LZ4MessagePackSerializer.Serialize(VoiceCtrl.subtitlesDict));
             else
                 BepInEx.Logger.Log(LogLevel.Warning, KKSubsPlugin.BEPNAME + "The amount of lines is suspiciously low (defaced sheet?); not caching.");
+
+            VoiceCtrl.GetVoiceFromInfo();
         }
 
         internal static Dictionary<string, KeyValuePair<string, string>> LoadFromMessagepack(string file = "")

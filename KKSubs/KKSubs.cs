@@ -16,6 +16,10 @@ namespace KKSubs
         public const string GUID = "org.bepinex.kk.KKSubs";
         public const string BEPNAME = "[KKSubs] ";
 
+        public const string SSURL = "https://docs.google.com/spreadsheets/d/";
+        public const string SHEET_KEY = "1U0pRyY8e2fIg0E4iBXXRIzpGGDBs5W_g9KfjObS-xI0";
+        public const string RANGE = "A1:C";
+
         public static KKSubsPlugin Plugin { get; private set; }
         public static HarmonyInstance harmony { get; private set; }
 
@@ -86,7 +90,7 @@ namespace KKSubs
 
         [DisplayName("Language Options")]
         [Description("Show Captions None/ENG(default)/JP/Other.\n Selecting Other will permit another plugin to provide translation.")]
-        [AcceptableValueList(new object[] { Lang.None, Lang.ENG, Lang.JP, Lang.Other })]
+        [AcceptableValueList(new object[] { Lang.None, Lang.Original, Lang.Translated, Lang.Other })]
         [Advanced(true)]
         public static ConfigWrapper<Lang> LangOptions { get; private set; }
         [DisplayName("Update Mode")]
@@ -106,6 +110,16 @@ namespace KKSubs
         [Category("Logging Options")]
         [Advanced(true)]
         public static ConfigWrapper<string> logDir { get; private set; }
+
+        [Advanced(true)]
+        [Browsable(false)]
+        public static ConfigWrapper<string> sourceURL { get; private set; }
+        [Advanced(true)]
+        [Browsable(false)]
+        public static ConfigWrapper<string> sourceSheet { get; private set; }
+        [Browsable(false)]
+        [Advanced(true)]
+        public static ConfigWrapper<string> sourceRange { get; private set; }
 
         #endregion
 
@@ -155,11 +169,11 @@ namespace KKSubs
 
         public void Update()
         {
-            if (ReloadTrans.IsPressed())
+            if (ReloadTrans.IsDown())
                 StartCoroutine(SubsCache.DownloadSubs());
-            else if (CBCopy.IsPressed())
+            else if (CBCopy.IsDown())
                 GUIUtility.systemCopyBuffer = ((copyJPLine.Value ? " : " + VoiceCtrl.currentLine.Key : "") + VoiceCtrl.currentLine.Value);
-            else if (SceneLogging.IsPressed()) sceneLogging.Value = !sceneLogging.Value;
+            else if (SceneLogging.IsDown()) sceneLogging.Value = !sceneLogging.Value;
         }
 
         private IEnumerator<WaitWhile> InitAsync()
@@ -174,10 +188,14 @@ namespace KKSubs
             outlineColor = new ConfigWrapper<Color>("outlineColor", this, str2Col, Col2str, Color.black);
             outlineColor2 = new ConfigWrapper<Color>("outlineColor2", this, str2Col, Col2str, outlineColor.Value);
 
-            LangOptions = new ConfigWrapper<Lang>("LangOptions", this, Lang.ENG);
+            LangOptions = new ConfigWrapper<Lang>("LangOptions", this, Lang.Translated);
             Updatemode = new ConfigWrapper<UpdateMode>("Updatemode", this, UpdateMode.None);
             prefixType = new ConfigWrapper<PrefixType>("prefixType", this, PrefixType.PersonalityNo);
             logDir = new ConfigWrapper<string>("logDir", this, "translation");
+
+            sourceURL = new ConfigWrapper<string>("sourceURL", this, SSURL);
+            sourceSheet = new ConfigWrapper<string>("sourceSheet", this, SHEET_KEY);
+            sourceRange = new ConfigWrapper<string>("sourceRange", this, RANGE);
 
             textColor.SettingChanged += OnSettingChanged;
             textColor2.SettingChanged += OnSettingChanged;
@@ -206,7 +224,6 @@ namespace KKSubs
 
             SceneLog.LogFile = null;
             SceneLog.LogFilename = "";
-
         }
 
         public void OnDestroy() { Hooks.DetachPatch(); }
@@ -261,7 +278,7 @@ namespace KKSubs
             }
         }
 
-        public enum Lang { None, JP, ENG, Other }
+        public enum Lang { None, Original, Translated, Other }
 
         public enum UpdateMode { None, Game, Scene }
 

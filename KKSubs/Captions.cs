@@ -37,7 +37,7 @@ namespace KKSubs
         internal static void DisplaySubtitle(LoadVoice voice, string speaker)
         {
             if (KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.None
-                || (KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.ENG && VoiceCtrl.currentLine.Value.IsNullOrEmpty()))
+                || (KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.Translated && VoiceCtrl.currentLine.Value.IsNullOrEmpty()))
                 return;
 
             Font fontFace = (Font)Resources.GetBuiltinResource(typeof(Font), "Arial.ttf");
@@ -65,7 +65,7 @@ namespace KKSubs
             subOutline.effectColor = KKSubsPlugin.outlineColor.Value;
             subOutline.effectDistance = new Vector2(KKSubsPlugin.outlineThickness.Value, KKSubsPlugin.outlineThickness.Value);
 
-            text.text = speaker + ": " + ((KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.ENG) ? VoiceCtrl.currentLine.Value : VoiceCtrl.currentLine.Key);
+            text.text = speaker + ": " + ((KKSubsPlugin.LangOptions.Value == KKSubsPlugin.Lang.Translated) ? VoiceCtrl.currentLine.Value : VoiceCtrl.currentLine.Key);
 
             voice.OnDestroyAsObservable().Subscribe(delegate (Unit _)
             {
